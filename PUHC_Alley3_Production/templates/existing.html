@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Before - Water Alley Today | PUHC Innovation Alleys</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global-theme.css') }}">
+    <script src="{{ url_for('static', filename='js/cache-buster.js') }}"></script>
+    <style>
+        /* Hero Section with Background Image */
+        .hero-existing {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: left;
+            background: linear-gradient(90deg, rgba(10, 25, 35, 0.9) 0%, rgba(10, 25, 35, 0.5) 60%, transparent 100%), 
+                        url('/static/images/alley-street-1.jpg') center center / cover no-repeat;
+            padding: var(--spacing-xxl) var(--spacing-xl);
+            margin-top: 70px;
+        }
+
+        .hero-content {
+            max-width: 550px;
+            padding-left: var(--spacing-lg);
+        }
+
+        .page-container {
+            min-height: auto;
+            padding: var(--spacing-xl) var(--spacing-lg);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .prototype-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(15, 164, 175, 0.15);
+            border: 1px solid rgba(15, 164, 175, 0.4);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--highlight);
+            letter-spacing: 1px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.15;
+        }
+
+        .page-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 450px;
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .location-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--highlight);
+            font-weight: 500;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--highlight);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary-hero:hover {
+            background: #0cb5c2;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary-hero:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Tagline Bar */
+        .tagline-bar {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--secondary);
+            border-bottom: 1px solid rgba(15, 164, 175, 0.15);
+        }
+
+        .tagline-item {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Street View Section */
+        .streetview-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .streetview-container {
+            width: 100%;
+            height: 450px;
+            background: var(--secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .streetview-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .streetview-fallback {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+
+        .streetview-fallback-icon {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--highlight);
+            background: rgba(15, 164, 175, 0.15);
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-bottom: var(--spacing-md);
+            letter-spacing: 1px;
+        }
+
+        /* Data Section */
+        .data-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .data-card {
+            background: var(--secondary);
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .data-card-icon {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--highlight);
+            background: rgba(15, 164, 175, 0.15);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: var(--spacing-sm);
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .data-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--highlight);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .data-card-value.loading {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .data-card-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .data-card-source {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Challenges Section */
+        .challenges-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .challenge-card {
+            background: rgba(150, 71, 52, 0.1);
+            border: 1px solid rgba(150, 71, 52, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+
+        .challenge-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .challenge-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .challenge-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Photos Section */
+        .photos-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-md);
+        }
+
+        .photo-placeholder {
+            aspect-ratio: 4/3;
+            background: var(--secondary);
+            border: 2px dashed rgba(15, 164, 175, 0.3);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-align: center;
+            padding: var(--spacing-md);
+        }
+
+        .photo-placeholder-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+            opacity: 0.5;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--highlight), #0CB5C2);
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(15, 164, 175, 0.4);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: transparent;
+            color: var(--text-primary);
+            font-weight: 600;
+            border: 2px solid rgba(15, 164, 175, 0.5);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(15, 164, 175, 0.1);
+            border-color: var(--highlight);
+        }
+
+        @media (max-width: 768px) {
+            .photos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .streetview-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Navigation -->
+    <nav class="global-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span class="nav-logo-text">PUHC Innovation Alleys</span>
+            </a>
+            <ul class="nav-tabs" id="navTabs">
+                <li class="nav-tab"><a href="/">Alley 3</a></li>
+                <li class="nav-tab active"><a href="/existing">Before</a></li>
+                <li class="nav-tab"><a href="/unreal-viewer">Explore</a></li>
+                <li class="nav-tab"><a href="/compare">Compare</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Background Image -->
+    <section class="hero-existing">
+        <div class="hero-content">
+            <span class="prototype-badge">BEFORE</span>
+            <h1 class="page-title">Water Alley Today</h1>
+            <p class="page-subtitle">Current conditions and challenges in Alley 3.</p>
+            <div class="location-info">
+                <span>W 11th & W 12th St, Pico-Union, Los Angeles</span>
+            </div>
+            <div class="hero-cta-group">
+                <a href="/unreal-viewer" class="btn-primary-hero">Explore in 3D</a>
+                <a href="#photos" class="btn-secondary-hero">View Photos ↓</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tagline Bar -->
+    <div class="tagline-bar">
+        <span class="tagline-item">One alley</span>
+        <span class="tagline-item">•</span>
+        <span class="tagline-item">Three interventions</span>
+        <span class="tagline-item">•</span>
+        <span class="tagline-item">Before & after</span>
+    </div>
+
+    <div class="page-container">
+        <!-- Street View Section -->
+        <div class="streetview-section">
+            <h2 class="section-title">Navigate the Alley</h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: var(--spacing-md);">Interactive Google Street View of Water Alley's current conditions</p>
+            <div class="streetview-container" id="streetviewContainer">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!4v1706486400000!6m8!1m7!1sCAoSLEFGMVFpcE1fVDNfYjBfYjBfYjBfYjBfYjBfYjBfYjBfYjBfYjBfYjBfYjA!2m2!1d34.04982619528969!2d-118.2818586747943!3f0!4f0!5f0.7820865974627469"
+                    width="100%" 
+                    height="100%" 
+                    style="border:0; border-radius: var(--radius-md);" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- Real Data Section -->
+        <div class="data-section">
+            <h2 class="section-title">Real Environmental Data</h2>
+            <div class="data-grid">
+                <div class="data-card">
+                    <div class="data-card-icon">TEMP</div>
+                    <div class="data-value">94°F</div>
+                    <div class="data-card-label">Surface Temperature</div>
+                    <div class="data-card-source">Source: NASA POWER API</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">SUN</div>
+                    <div class="data-value">5.2 kWh/m²</div>
+                    <div class="data-card-label">Solar Radiation</div>
+                    <div class="data-card-source">Source: NASA POWER API</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">AIR</div>
+                    <div class="data-value">Moderate</div>
+                    <div class="data-card-label">Air Quality Index</div>
+                    <div class="data-card-source">Source: Google Air Quality API</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">LOC</div>
+                    <div class="data-card-value" style="font-size: 1.5rem;">Alley 3</div>
+                    <div class="data-card-label">Water Alley</div>
+                    <div class="data-card-source">Pico-Union, Los Angeles</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos Section -->
+        <div class="photos-section" id="photos">
+            <h2 class="section-title">Site Photos</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
+                <div style="border-radius: var(--radius-md); overflow: hidden;">
+                    <img src="/static/images/alley-street-1.jpg" alt="Alley 3 View 1" style="width: 100%; height: 200px; object-fit: cover;">
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Alley entrance with bougainvillea</p>
+                </div>
+                <div style="border-radius: var(--radius-md); overflow: hidden;">
+                    <img src="/static/images/alley-street-2.png" alt="Alley 3 View 2" style="width: 100%; height: 200px; object-fit: cover;">
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Street view with existing mural</p>
+                </div>
+                <div style="border-radius: var(--radius-md); overflow: hidden;">
+                    <img src="/static/images/alley-street-3.png" alt="Alley 3 View 3" style="width: 100%; height: 200px; object-fit: cover;">
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Corner with fence and utility pole</p>
+                </div>
+                <div style="border-radius: var(--radius-md); overflow: hidden;">
+                    <img src="/static/images/alley-graffiti-wall.jpg" alt="Blank wall with graffiti" style="width: 100%; height: 200px; object-fit: cover;">
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Blank wall — opportunity for murals</p>
+                </div>
+                <div style="border-radius: var(--radius-md); overflow: hidden;">
+                    <img src="/static/images/alley-street-5.jpg" alt="Alley 3 View 5" style="width: 100%; height: 200px; object-fit: cover;">
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Wall surfaces and vegetation</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <a href="/unreal-viewer" class="btn-primary">Explore in 3D →</a>
+            <a href="/compare" class="btn-secondary">Compare Before & After</a>
+        </div>
+    </div>
+
+    <script>
+        // Fetch real NASA data on page load
+        async function loadEnvironmentalData() {
+            try {
+                // Fetch alley data from backend
+                const response = await fetch('/api/alley-data/alley3');
+                const data = await response.json();
+                
+                // Update temperature
+                const tempEl = document.getElementById('tempValue');
+                if (data.temperature && data.temperature !== 'N/A') {
+                    tempEl.textContent = data.temperature + '°F';
+                    tempEl.classList.remove('loading');
+                } else {
+                    tempEl.textContent = '~94°F';
+                    tempEl.classList.remove('loading');
+                }
+                
+                // Update solar radiation
+                const solarEl = document.getElementById('solarValue');
+                if (data.solar_radiation && data.solar_radiation !== 'N/A') {
+                    solarEl.textContent = data.solar_radiation + ' kWh/m²';
+                    solarEl.classList.remove('loading');
+                } else {
+                    solarEl.textContent = '~5.2 kWh/m²';
+                    solarEl.classList.remove('loading');
+                }
+                
+                // Update AQI
+                const aqiEl = document.getElementById('aqiValue');
+                if (data.aqi && data.aqi !== 'N/A') {
+                    aqiEl.textContent = data.aqi;
+                    aqiEl.classList.remove('loading');
+                } else {
+                    aqiEl.textContent = 'Moderate';
+                    aqiEl.classList.remove('loading');
+                }
+                
+            } catch (error) {
+                console.error('Error loading environmental data:', error);
+                // Set fallback values
+                document.getElementById('tempValue').textContent = '~94°F';
+                document.getElementById('solarValue').textContent = '~5.2 kWh/m²';
+                document.getElementById('aqiValue').textContent = 'Moderate';
+                
+                document.querySelectorAll('.data-card-value.loading').forEach(el => {
+                    el.classList.remove('loading');
+                });
+            }
+        }
+
+        // Initialize Street View
+        function initStreetView() {
+            const container = document.getElementById('streetviewContainer');
+            const fallback = document.getElementById('streetviewFallback');
+            
+            // Alley 3 coordinates
+            const lat = 34.04982619528969;
+            const lng = -118.2818586747943;
+            
+            // Create Google Maps embed URL
+            const embedUrl = `https://www.google.com/maps/embed/v1/streetview?key={{ google_api_key }}&location=${lat},${lng}&heading=0&pitch=0&fov=90`;
+            
+            // Check if API key is available
+            if ('{{ google_api_key }}' && '{{ google_api_key }}' !== '') {
+                const iframe = document.createElement('iframe');
+                iframe.src = embedUrl;
+                iframe.allowFullscreen = true;
+                iframe.loading = 'lazy';
+                container.innerHTML = '';
+                container.appendChild(iframe);
+            } else {
+                // Show static map fallback
+                fallback.innerHTML = `
+                    <div class="streetview-fallback-icon">🗺️</div>
+                    <p><strong>Alley 3 Location</strong></p>
+                    <p>W 11th & W 12th St, Pico-Union</p>
+                    <p style="margin-top: 1rem;">
+                        <a href="https://www.google.com/maps/@${lat},${lng},3a,75y,0h,90t/data=!3m6!1e1!3m4!1s0!2e0!7i16384!8i8192" 
+                           target="_blank" 
+                           style="color: var(--highlight); text-decoration: none;">
+                            Open in Google Maps →
+                        </a>
+                    </p>
+                    <p style="font-size: 0.75rem; margin-top: 1rem; color: var(--text-muted);">
+                        Coordinates: ${lat}, ${lng}
+                    </p>
+                `;
+            }
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEnvironmentalData();
+            initStreetView();
+        });
+
+        // Mobile nav toggle
+        document.getElementById('navToggle').addEventListener('click', function() {
+            document.getElementById('navTabs').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

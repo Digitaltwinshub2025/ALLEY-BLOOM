@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Before & After - Alley Bloom</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global-theme.css') }}">
+    <script src="{{ url_for('static', filename='js/cache-buster.js') }}"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-primary);
+            background: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl) var(--spacing-xl);
+            margin-top: 70px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .page-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .comparison-intro {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .intro-card {
+            background: rgba(15, 164, 175, 0.08);
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .intro-card-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--highlight);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .intro-card-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .intro-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--highlight);
+        }
+
+        .how-it-works {
+            background: rgba(15, 164, 175, 0.05);
+            border: 1px solid rgba(15, 164, 175, 0.15);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--highlight);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #0CB5C2;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--text-primary);
+            border: 1px solid rgba(15, 164, 175, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(15, 164, 175, 0.1);
+            border-color: var(--highlight);
+        }
+
+        .scenarios-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: rgba(15, 164, 175, 0.05);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--highlight);
+        }
+
+        .scenarios-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .scenarios-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .scenario-card {
+            background: linear-gradient(135deg, rgba(15, 164, 175, 0.08) 0%, rgba(15, 164, 175, 0.03) 100%);
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            border-color: var(--highlight);
+            box-shadow: 0 8px 24px rgba(15, 164, 175, 0.15);
+        }
+
+        .scenario-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid rgba(15, 164, 175, 0.15);
+        }
+
+        .scenario-type {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--highlight);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .scenario-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .scenario-location {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .scenario-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid rgba(15, 164, 175, 0.15);
+            font-size: 0.85rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .meta-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-value {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .scenario-snapshot {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, rgba(15, 164, 175, 0.1) 0%, rgba(15, 164, 175, 0.05) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scenario-snapshot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scenario-actions {
+            padding: var(--spacing-lg);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .scenario-actions .btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 0.85rem;
+            padding: 0.6rem 1rem;
+        }
+
+        .comparison-legend {
+            background: rgba(15, 164, 175, 0.05);
+            border: 1px solid rgba(15, 164, 175, 0.15);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .legend-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .legend-item {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: flex-start;
+        }
+
+        .legend-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--highlight);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .legend-text {
+            flex: 1;
+        }
+
+        .legend-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .legend-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .full-width-scenarios {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .full-scenario-card {
+            background: linear-gradient(135deg, rgba(15, 164, 175, 0.08) 0%, rgba(15, 164, 175, 0.03) 100%);
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .full-scenario-card:hover {
+            border-color: var(--highlight);
+            box-shadow: 0 8px 24px rgba(15, 164, 175, 0.15);
+        }
+
+        .full-scenario-snapshot {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, rgba(15, 164, 175, 0.1) 0%, rgba(15, 164, 175, 0.05) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .full-scenario-snapshot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .full-scenario-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid rgba(15, 164, 175, 0.15);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .full-scenario-footer .btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 0.85rem;
+            padding: 0.6rem 1rem;
+        }
+
+        .disclaimer {
+            background: rgba(15, 164, 175, 0.05);
+            border-left: 3px solid var(--highlight);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .disclaimer-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        @media (max-width: 768px) {
+            .comparison-intro {
+                grid-template-columns: 1fr;
+            }
+
+            .scenarios-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width-scenarios {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="global-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span class="nav-logo-text">PUHC Innovation Alleys</span>
+            </a>
+            <ul class="nav-tabs" id="navTabs">
+                <li class="nav-tab"><a href="/">Alley 3</a></li>
+                <li class="nav-tab"><a href="/existing">Before</a></li>
+                <li class="nav-tab"><a href="/unreal-viewer">Explore</a></li>
+                <li class="nav-tab"><a href="/compare">Compare</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title">Compare Scenarios</h1>
+            <p class="page-subtitle">See how our alley transformation improves temperature, shade, and environmental conditions.</p>
+        </div>
+
+        <div class="comparison-intro">
+            <div class="intro-card">
+                <div class="intro-card-label">Baseline Conditions</div>
+                <div class="intro-card-text">Current state baseline with existing conditions of high heat vulnerability, lack of shade coverage</div>
+            </div>
+            <div class="intro-arrow">→</div>
+            <div class="intro-card">
+                <div class="intro-card-label">Vision Scenario</div>
+                <div class="intro-card-text">Conceptual urban design with overlay of proposed improvements and improved air quality metrics</div>
+            </div>
+        </div>
+
+        <div class="how-it-works">
+            Here's how it works: Create different design ideas for your alley and compare them side-by-side to calculate impact with the highest impact.
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="navigateTo('/scenarios')">Create Scenario</button>
+            <button class="btn btn-secondary" onclick="generateSampleData()">Generate Sample Data</button>
+            <button class="btn btn-secondary" onclick="compareSitesByAlley()">Compare Sites by Alley</button>
+            <button class="btn btn-secondary" onclick="downloadReport()">Download Report</button>
+        </div>
+
+        <div class="scenarios-header">
+            <div>
+                <div class="scenarios-title">4 Active Scenarios</div>
+                <div class="scenarios-meta">Updated at 3:02 PM</div>
+            </div>
+            <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                <span>Scenario ID tag • Visually identifies baseline vs concept</span>
+                <span>Snapshot preview • Grasped from Street View viewport button</span>
+                <span>Overlay toggle • States transformed when screenshots</span>
+            </div>
+        </div>
+
+        <div class="scenarios-grid">
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-type">Baseline</div>
+                    <div class="scenario-name">Current Alley</div>
+                    <div class="scenario-location">
+                        Alley 3 - Water<br>
+                        between 11th St & W 12th St, Pico-Union
+                    </div>
+                </div>
+                <div class="scenario-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Cross Streets</div>
+                        <div class="meta-value">100m - 52ft</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Status</div>
+                        <div class="meta-value">Planning</div>
+                    </div>
+                </div>
+                <div class="scenario-snapshot">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='250'%3E%3Crect fill='%230F4A50' width='400' height='250'/%3E%3Ctext x='200' y='125' font-size='14' fill='%230FA4AF' text-anchor='middle' dominant-baseline='middle'%3ESnapshot Preview%3C/text%3E%3C/svg%3E" alt="Baseline snapshot">
+                </div>
+                <div class="scenario-actions">
+                    <button class="btn btn-secondary" onclick="editScenario('baseline-alley3')">Edit Scenario</button>
+                    <button class="btn btn-primary" onclick="viewInStudio('baseline-alley3')">View in Studio</button>
+                </div>
+            </div>
+
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-type">Concept A</div>
+                    <div class="scenario-name">Rain Gardens</div>
+                    <div class="scenario-location">
+                        Alley 3 - Water<br>
+                        between 11th St & W 12th St, Pico-Union
+                    </div>
+                </div>
+                <div class="scenario-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Cross Streets</div>
+                        <div class="meta-value">100m - 50ft</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Status</div>
+                        <div class="meta-value">Planning</div>
+                    </div>
+                </div>
+                <div class="scenario-snapshot">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='250'%3E%3Crect fill='%230F4A50' width='400' height='250'/%3E%3Ctext x='200' y='125' font-size='14' fill='%230FA4AF' text-anchor='middle' dominant-baseline='middle'%3ESnapshot Preview%3C/text%3E%3C/svg%3E" alt="Concept A snapshot">
+                </div>
+                <div class="scenario-actions">
+                    <button class="btn btn-secondary" onclick="editScenario('concept-a-alley3')">Edit Scenario</button>
+                    <button class="btn btn-primary" onclick="viewInStudio('concept-a-alley3')">View in Studio</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-legend">
+            <div class="legend-title">How to Read This Page</div>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-icon">1</div>
+                    <div class="legend-text">
+                        <div class="legend-label">Scenario ID Tag</div>
+                        <div class="legend-description">Visually identifies baseline vs concept</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon">2</div>
+                    <div class="legend-text">
+                        <div class="legend-label">Snapshot Preview</div>
+                        <div class="legend-description">Grasped from Street View viewport button</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon">3</div>
+                    <div class="legend-text">
+                        <div class="legend-label">Overlay Toggle</div>
+                        <div class="legend-description">States transformed when screenshots</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon">4</div>
+                    <div class="legend-text">
+                        <div class="legend-label">Open Set</div>
+                        <div class="legend-description">4 open sets from better or softer</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon">5</div>
+                    <div class="legend-text">
+                        <div class="legend-label">Overly Toggle</div>
+                        <div class="legend-description">States transformed when screenshots</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon">6</div>
+                    <div class="legend-text">
+                        <div class="legend-label">Impact Metrics</div>
+                        <div class="legend-description">Updated for scenario comparison</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: var(--spacing-xl);">
+            <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: var(--spacing-lg);">Full Scenario Comparison</h2>
+            <div class="full-width-scenarios">
+                <div class="full-scenario-card">
+                    <div style="padding: var(--spacing-lg); border-bottom: 1px solid rgba(15, 164, 175, 0.15);">
+                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--highlight); margin-bottom: var(--spacing-xs);">Before</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary);">Current Alley</div>
+                    </div>
+                    <div class="full-scenario-snapshot">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300'%3E%3Crect fill='%230F4A50' width='600' height='300'/%3E%3Ctext x='300' y='150' font-size='16' fill='%230FA4AF' text-anchor='middle' dominant-baseline='middle'%3EBefore Snapshot%3C/text%3E%3C/svg%3E" alt="Before">
+                    </div>
+                    <div class="full-scenario-footer">
+                        <button class="btn btn-secondary" onclick="editScenario('before-full')">Edit Scenario</button>
+                        <button class="btn btn-primary" onclick="viewInStudio('before-full')">View in Studio</button>
+                    </div>
+                </div>
+
+                <div class="full-scenario-card">
+                    <div style="padding: var(--spacing-lg); border-bottom: 1px solid rgba(15, 164, 175, 0.15);">
+                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--highlight); margin-bottom: var(--spacing-xs);">After</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary);">Rain Gardens</div>
+                    </div>
+                    <div class="full-scenario-snapshot">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300'%3E%3Crect fill='%230F4A50' width='600' height='300'/%3E%3Ctext x='300' y='150' font-size='16' fill='%230FA4AF' text-anchor='middle' dominant-baseline='middle'%3EAfter Snapshot%3C/text%3E%3C/svg%3E" alt="After">
+                    </div>
+                    <div class="full-scenario-footer">
+                        <button class="btn btn-secondary" onclick="editScenario('after-full')">Edit Scenario</button>
+                        <button class="btn btn-primary" onclick="viewInStudio('after-full')">View in Studio</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <div class="disclaimer-title">Visualization Disclaimer</div>
+            <p>This visualization is for conceptual review only. Final design and precise placement will be developed during detailed design phase by urban designers and landscape architects.</p>
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(path) {
+            window.location.href = path;
+        }
+
+        function generateSampleData() {
+            alert('Sample data generated. Refresh to see new scenarios.');
+        }
+
+        function compareSitesByAlley() {
+            alert('Comparison view loading...');
+        }
+
+        function downloadReport() {
+            alert('Report download initiated.');
+        }
+
+        function editScenario(scenarioId) {
+            window.location.href = `/scenarios?edit=${scenarioId}`;
+        }
+
+        function viewInStudio(scenarioId) {
+            fetch(`/api/scenario/${scenarioId}`)
+                .then(r => r.json())
+                .then(data => {
+                    sessionStorage.setItem('activeScenario', JSON.stringify(data));
+                    window.location.href = `/visualization-studio?scenario=${scenarioId}`;
+                })
+                .catch(err => {
+                    console.error('Error loading scenario:', err);
+                    alert('Could not load scenario. Please try again.');
+                });
+        }
+    </script>
+</body>
+</html>
