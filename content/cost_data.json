@@ -8,9 +8,9 @@
       "title": "Area A - Project 2",
       "sections": "Sections 1-6",
       "scope": "Full revitalization of residential alleyway. Sections 1-6 address damaged fencing, graffiti, and deteriorating pavement.",
-      "primary_image": "/static/images/areas/project-2/White Wooden Fence (Graffiti Removal + Repaint + Ground Detailing) 1.png",
+      "primary_image": "static/images/areas/project-2/White Wooden Fence (Graffiti Removal + Repaint + Ground Detailing) 1.png",
       "image_caption": "Existing Condition -- White wooden fence with graffiti, Area A",
-      "rhino_file": "/static/docs/rhino/project-2.3dm",
+      "rhino_file": "static/docs/rhino/project-2.3dm",
       "map_label": "S1-S6 Fence Segment",
       "cost_table": {
         "wall": {
@@ -45,9 +45,9 @@
       "title": "Area A - Project 3",
       "sections": "Sections 1-7",
       "scope": "Continued alley restoration covering fences, gates, stucco, rust removal, repainting, panel repairs, and optional trim.",
-      "primary_image": "/static/images/areas/project-3/Gate Segment with Rusted Frame, Painted Panel, and Overgrown Pavemen 1.png",
+      "primary_image": "static/images/areas/project-3/Gate Segment with Rusted Frame, Painted Panel, and Overgrown Pavemen 1.png",
       "image_caption": "Existing Condition -- Rusted gate frame with overgrown pavement, Area A",
-      "rhino_file": "/static/docs/rhino/project-3.3dm",
+      "rhino_file": "static/docs/rhino/project-3.3dm",
       "map_label": "S1-S7 Gate & Fence",
       "cost_table": {
         "wall": {
@@ -97,9 +97,9 @@
       "title": "Area B - Project 4",
       "sections": "Sections 1-3",
       "scope": "Large and mid-sized wall repairs with varying levels of graffiti, cracking, chipping, and weather wear.",
-      "primary_image": "/static/images/areas/project-4/Concrete Wall with Graffiti, Chipping, and Surface Burn 1.png",
+      "primary_image": "static/images/areas/project-4/Concrete Wall with Graffiti, Chipping, and Surface Burn 1.png",
       "image_caption": "Existing Condition -- Concrete wall with graffiti and surface burn, Area B",
-      "rhino_file": "/static/docs/rhino/project-4.3dm",
+      "rhino_file": "static/docs/rhino/project-4.3dm",
       "map_label": "S1-S3 Wall Segment",
       "cost_table": {
         "wall": {
@@ -134,9 +134,9 @@
       "title": "Area B - Project 5",
       "sections": "Sections 1-3",
       "scope": "Full-surface rust removal, sanding, and repainting of metal gates and fences across three key sections.",
-      "primary_image": "/static/images/areas/project-5/Iron Fence + Concrete Base1.png",
+      "primary_image": "static/images/areas/project-5/Iron Fence + Concrete Base1.png",
       "image_caption": "Existing Condition -- Iron fence with concrete base, Area B",
-      "rhino_file": "/static/docs/rhino/project-5.3dm",
+      "rhino_file": "static/docs/rhino/project-5.3dm",
       "map_label": "S1-S3 Iron Fence",
       "cost_table": {
         "wall": {
@@ -171,9 +171,9 @@
       "title": "Area C - Project 6",
       "sections": "Sections 1-3",
       "scope": "Restoring continuous stretch of black iron fencing with varying gate styles.",
-      "primary_image": "/static/images/areas/project-6/Curved Black Iron Fence with Concrete Base (Right of Gate) 1.png",
+      "primary_image": "static/images/areas/project-6/Curved Black Iron Fence with Concrete Base (Right of Gate) 1.png",
       "image_caption": "Existing Condition -- Black iron fence with concrete base, Area C",
-      "rhino_file": "/static/docs/rhino/project-6.3dm",
+      "rhino_file": "static/docs/rhino/project-6.3dm",
       "map_label": "S1-S3 Iron Fence",
       "cost_table": {
         "wall": {
@@ -208,9 +208,9 @@
       "title": "Area C - Project 7",
       "sections": "Sections 1-6",
       "scope": "Concrete walls, mural walls, and metal gates. Surface cleaning, paint restoration, rust removal, and anti-graffiti/UV protection.",
-      "primary_image": "/static/images/areas/project-7/Concrete Wall with Painted Mural 1.png",
+      "primary_image": "static/images/areas/project-7/Concrete Wall with Painted Mural 1.png",
       "image_caption": "Existing Condition -- Concrete wall with painted mural, Area C",
-      "rhino_file": "/static/docs/rhino/project-7.3dm",
+      "rhino_file": "static/docs/rhino/project-7.3dm",
       "map_label": "S1-S6 Mural & Gate",
       "cost_table": {
         "wall": {
@@ -250,9 +250,9 @@
       "title": "Area C - Project 8",
       "sections": "Sections 1-3",
       "scope": "Restoring gate and garage wall surfaces with sanding, rust removal, and fresh coats of rust-resistant paint. Roof restoration for garage units.",
-      "primary_image": "/static/images/areas/project-8/Garage Doors + Wall Sections (Excludes Roof) 1.png",
+      "primary_image": "static/images/areas/project-8/Garage Doors + Wall Sections (Excludes Roof) 1.png",
       "image_caption": "Existing Condition -- Garage doors and wall sections, Area C",
-      "rhino_file": "/static/docs/rhino/project-8.3dm",
+      "rhino_file": "static/docs/rhino/project-8.3dm",
       "map_label": "S1-S3 Garage & Gate",
       "cost_table": {
         "wall": {
@@ -303,9 +303,9 @@
       "title": "Area D - Project 9",
       "sections": "Sections 1-7",
       "scope": "Full perimeter gate and fence restoration. Red and black metal fence segments, multiple gates and walk-through doors.",
-      "primary_image": "/static/images/areas/project-9/Red Fence Gate 1.png",
+      "primary_image": "static/images/areas/project-9/Red Fence Gate 1.png",
       "image_caption": "Existing Condition -- Red fence gate with barbed wire, Area D",
-      "rhino_file": "/static/docs/rhino/project-9.3dm",
+      "rhino_file": "static/docs/rhino/project-9.3dm",
       "map_label": "S1-S7 Red & Black Fence",
       "cost_table": {
         "gate_wall": {
@@ -347,9 +347,9 @@
       "title": "Area D - Project 10",
       "sections": "Sections 1-8",
       "scope": "Full-length intervention addressing long-term neglect. Metal fence panels, rolling gates, walk-through gates, and large mural walls.",
-      "primary_image": "/static/images/areas/project-10/Large Mural Wall with Pipe Detail 1.png",
+      "primary_image": "static/images/areas/project-10/Large Mural Wall with Pipe Detail 1.png",
       "image_caption": "Existing Condition -- Large mural wall with pipe detail, Area D",
-      "rhino_file": "/static/docs/rhino/project-10.3dm",
+      "rhino_file": "static/docs/rhino/project-10.3dm",
       "map_label": "S1-S8 Mural & Rolling Gate",
       "cost_table": {
         "wall": {
