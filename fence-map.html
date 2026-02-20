@@ -1,0 +1,1147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Fence Map | PUHC Innovation Alleys</title>
+    <meta name="description" content="Interactive spatial map of Alley 3 fence segments. Click a segment to view existing conditions, repair cost estimates, and design options.">
+    <link rel="icon" type="image/svg+xml" href="static/images/favicon.svg">
+    <link rel="stylesheet" href="static/css/global-theme.css">
+    <script src="static/js/cache-buster.js"></script>
+    <style>
+        .fmap-page {
+            min-height: 100vh;
+            padding: 90px var(--spacing-lg) var(--spacing-xl);
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .fmap-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .fmap-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .fmap-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .fmap-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            align-items: start;
+        }
+
+        /* Left Column - Alley Diagram */
+        .fmap-diagram-col {
+            position: sticky;
+            top: 90px;
+        }
+
+        .fmap-diagram-wrap {
+            background: var(--secondary);
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .fmap-diagram-title {
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(15, 164, 175, 0.15);
+        }
+
+        .fmap-svg-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3 / 5;
+            background: linear-gradient(180deg, rgba(10, 25, 35, 0.95) 0%, rgba(15, 30, 40, 0.98) 100%);
+        }
+
+        .fmap-svg-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* SVG Hotspot Styles */
+        .fence-segment {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .fence-segment rect,
+        .fence-segment polygon {
+            fill: rgba(15, 164, 175, 0.12);
+            stroke: rgba(15, 164, 175, 0.4);
+            stroke-width: 1.5;
+            transition: all 0.2s ease;
+        }
+
+        .fence-segment:hover rect,
+        .fence-segment:hover polygon {
+            fill: rgba(15, 164, 175, 0.3);
+            stroke: var(--accent);
+            stroke-width: 2;
+        }
+
+        .fence-segment.active rect,
+        .fence-segment.active polygon {
+            fill: rgba(15, 164, 175, 0.35);
+            stroke: var(--accent);
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 6px rgba(15, 164, 175, 0.5));
+        }
+
+        .fence-segment text {
+            fill: var(--text-muted);
+            font-size: 7px;
+            font-weight: 600;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: central;
+            transition: fill 0.2s ease;
+        }
+
+        .fence-segment:hover text,
+        .fence-segment.active text {
+            fill: var(--text-primary);
+        }
+
+        .fence-label {
+            fill: rgba(15, 164, 175, 0.7);
+            font-size: 5.5px;
+            font-weight: 400;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        .fence-segment:hover .fence-label,
+        .fence-segment.active .fence-label {
+            fill: var(--accent);
+        }
+
+        /* Area zone labels */
+        .area-zone-label {
+            fill: rgba(255, 255, 255, 0.15);
+            font-size: 10px;
+            font-weight: 800;
+            text-anchor: middle;
+            letter-spacing: 2px;
+            pointer-events: none;
+        }
+
+        /* Alley center line */
+        .alley-center {
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 0.5;
+            stroke-dasharray: 3 3;
+        }
+
+        /* Legend */
+        .fmap-legend {
+            padding: 10px 16px;
+            border-top: 1px solid rgba(15, 164, 175, 0.15);
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .fmap-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .fmap-legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            border: 1px solid;
+        }
+
+        /* Right Column - Info Panel */
+        .fmap-panel-col {
+            min-height: 400px;
+        }
+
+        .fmap-panel {
+            background: var(--secondary);
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .fmap-panel.has-data {
+            border-color: rgba(15, 164, 175, 0.4);
+        }
+
+        .fmap-panel-title {
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(15, 164, 175, 0.15);
+        }
+
+        .fmap-panel-body {
+            padding: 20px;
+        }
+
+        .fmap-empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .fmap-empty-state .arrow-hint {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-sm);
+            opacity: 0.4;
+        }
+
+        /* Panel Content */
+        .fmap-project-header {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .fmap-project-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .fmap-area-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(15, 164, 175, 0.15);
+            border: 1px solid rgba(15, 164, 175, 0.3);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-right: 8px;
+        }
+
+        .fmap-sections-badge {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .fmap-image-wrap {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid rgba(15, 164, 175, 0.2);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .fmap-image-wrap img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .fmap-image-caption {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            padding: 6px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            line-height: 1.4;
+        }
+
+        .fmap-scope {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: var(--radius-sm);
+        }
+
+        .fmap-cost-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .fmap-cost-card {
+            padding: 12px;
+            background: rgba(15, 164, 175, 0.06);
+            border: 1px solid rgba(15, 164, 175, 0.15);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .fmap-cost-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .fmap-cost-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .fmap-cost-value.grand {
+            font-size: 1.3rem;
+        }
+
+        .fmap-grand-total {
+            padding: 14px;
+            background: rgba(15, 164, 175, 0.1);
+            border: 1px solid rgba(15, 164, 175, 0.25);
+            border-radius: var(--radius-md);
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .fmap-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .fmap-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .fmap-btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .fmap-btn-primary:hover {
+            filter: brightness(1.15);
+        }
+
+        .fmap-btn-secondary {
+            background: rgba(15, 164, 175, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(15, 164, 175, 0.3);
+        }
+
+        .fmap-btn-secondary:hover {
+            background: rgba(15, 164, 175, 0.2);
+            border-color: var(--accent);
+        }
+
+        .fmap-notes {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .fmap-notes strong {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .fmap-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .fmap-diagram-col {
+                position: static;
+            }
+
+            .fmap-svg-container {
+                aspect-ratio: 3 / 4;
+            }
+
+            .fmap-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .fmap-cost-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .fmap-actions {
+                flex-direction: column;
+            }
+
+            .fmap-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Navigation -->
+    <nav class="global-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="nav-logo-text">PUHC Innovation Alleys</span>
+            </a>
+            <ul class="nav-tabs" id="navTabs">
+                <li class="nav-tab"><a href="index.html">Alley 3</a></li>
+                <li class="nav-tab"><a href="existing.html">Before</a></li>
+                <li class="nav-tab active"><a href="fence-map.html">Fence Map</a></li>
+                <li class="nav-tab"><a href="unreal-viewer.html">Explore</a></li>
+                <li class="nav-tab"><a href="compare.html">Compare</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">&#9776;</button>
+        </div>
+    </nav>
+
+    <div class="fmap-page">
+        <!-- Header -->
+        <div class="fmap-header">
+            <h1>Interactive Fence Map -- Alley 3</h1>
+            <p>Click a fence segment to view existing conditions, repair estimates, and design options.</p>
+        </div>
+
+        <!-- Main Two-Column Layout -->
+        <div class="fmap-layout">
+            <!-- LEFT: Alley Diagram -->
+            <div class="fmap-diagram-col">
+                <div class="fmap-diagram-wrap">
+                    <div class="fmap-diagram-title">Alley 3 Segment Map</div>
+                    <div class="fmap-svg-container">
+                        <svg viewBox="0 0 200 340" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Alley background structure -->
+                            <rect x="60" y="10" width="80" height="320" fill="rgba(255,255,255,0.03)" rx="2"/>
+                            <line x1="100" y1="10" x2="100" y2="330" class="alley-center"/>
+
+                            <!-- Area zone labels -->
+                            <text x="100" y="55" class="area-zone-label">AREA A</text>
+                            <text x="100" y="140" class="area-zone-label">AREA B</text>
+                            <text x="100" y="215" class="area-zone-label">AREA C</text>
+                            <text x="100" y="300" class="area-zone-label">AREA D</text>
+
+                            <!-- Area dividers -->
+                            <line x1="60" y1="95" x2="140" y2="95" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" stroke-dasharray="2 2"/>
+                            <line x1="60" y1="175" x2="140" y2="175" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" stroke-dasharray="2 2"/>
+                            <line x1="60" y1="255" x2="140" y2="255" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" stroke-dasharray="2 2"/>
+
+                            <!-- AREA A - Projects 2 & 3 (top section, left and right sides) -->
+                            <g class="fence-segment" data-project="project-2" onclick="selectProject('project-2')">
+                                <rect x="15" y="18" width="40" height="35" rx="3"/>
+                                <text x="35" y="33">P2</text>
+                                <text x="35" y="42" class="fence-label">S1-S6</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-3" onclick="selectProject('project-3')">
+                                <rect x="145" y="18" width="40" height="35" rx="3"/>
+                                <text x="165" y="33">P3</text>
+                                <text x="165" y="42" class="fence-label">S1-S7</text>
+                            </g>
+
+                            <!-- Connector lines from segments to alley -->
+                            <line x1="55" y1="35" x2="60" y2="35" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+                            <line x1="140" y1="35" x2="145" y2="35" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+
+                            <!-- AREA A continued -->
+                            <g class="fence-segment" data-project="project-2" onclick="selectProject('project-2')">
+                                <rect x="15" y="58" width="40" height="30" rx="3"/>
+                                <text x="35" y="70">P2</text>
+                                <text x="35" y="79" class="fence-label">cont.</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-3" onclick="selectProject('project-3')">
+                                <rect x="145" y="58" width="40" height="30" rx="3"/>
+                                <text x="165" y="70">P3</text>
+                                <text x="165" y="79" class="fence-label">cont.</text>
+                            </g>
+
+                            <!-- AREA B - Projects 4 & 5 -->
+                            <g class="fence-segment" data-project="project-4" onclick="selectProject('project-4')">
+                                <rect x="15" y="103" width="40" height="30" rx="3"/>
+                                <text x="35" y="115">P4</text>
+                                <text x="35" y="124" class="fence-label">S1-S3</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-5" onclick="selectProject('project-5')">
+                                <rect x="145" y="103" width="40" height="30" rx="3"/>
+                                <text x="165" y="115">P5</text>
+                                <text x="165" y="124" class="fence-label">S1-S3</text>
+                            </g>
+
+                            <line x1="55" y1="118" x2="60" y2="118" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+                            <line x1="140" y1="118" x2="145" y2="118" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+
+                            <g class="fence-segment" data-project="project-4" onclick="selectProject('project-4')">
+                                <rect x="15" y="138" width="40" height="30" rx="3"/>
+                                <text x="35" y="150">P4</text>
+                                <text x="35" y="159" class="fence-label">cont.</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-5" onclick="selectProject('project-5')">
+                                <rect x="145" y="138" width="40" height="30" rx="3"/>
+                                <text x="165" y="150">P5</text>
+                                <text x="165" y="159" class="fence-label">cont.</text>
+                            </g>
+
+                            <!-- AREA C - Projects 6, 7, 8 -->
+                            <g class="fence-segment" data-project="project-6" onclick="selectProject('project-6')">
+                                <rect x="15" y="183" width="40" height="25" rx="3"/>
+                                <text x="35" y="196">P6</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-7" onclick="selectProject('project-7')">
+                                <rect x="145" y="183" width="40" height="25" rx="3"/>
+                                <text x="165" y="196">P7</text>
+                            </g>
+
+                            <line x1="55" y1="195" x2="60" y2="195" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+                            <line x1="140" y1="195" x2="145" y2="195" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+
+                            <g class="fence-segment" data-project="project-7" onclick="selectProject('project-7')">
+                                <rect x="15" y="213" width="40" height="18" rx="3"/>
+                                <text x="35" y="223">P7</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-8" onclick="selectProject('project-8')">
+                                <rect x="145" y="213" width="40" height="18" rx="3"/>
+                                <text x="165" y="223">P8</text>
+                            </g>
+
+                            <g class="fence-segment" data-project="project-8" onclick="selectProject('project-8')">
+                                <rect x="15" y="236" width="40" height="14" rx="3"/>
+                                <text x="35" y="244">P8</text>
+                            </g>
+
+                            <!-- AREA D - Projects 9 & 10 -->
+                            <g class="fence-segment" data-project="project-9" onclick="selectProject('project-9')">
+                                <rect x="15" y="263" width="40" height="28" rx="3"/>
+                                <text x="35" y="274">P9</text>
+                                <text x="35" y="283" class="fence-label">S1-S7</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-10" onclick="selectProject('project-10')">
+                                <rect x="145" y="263" width="40" height="28" rx="3"/>
+                                <text x="165" y="274">P10</text>
+                                <text x="165" y="283" class="fence-label">S1-S8</text>
+                            </g>
+
+                            <line x1="55" y1="277" x2="60" y2="277" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+                            <line x1="140" y1="277" x2="145" y2="277" stroke="rgba(15,164,175,0.2)" stroke-width="0.5"/>
+
+                            <g class="fence-segment" data-project="project-9" onclick="selectProject('project-9')">
+                                <rect x="15" y="296" width="40" height="25" rx="3"/>
+                                <text x="35" y="309">P9</text>
+                                <text x="35" y="317" class="fence-label">cont.</text>
+                            </g>
+                            <g class="fence-segment" data-project="project-10" onclick="selectProject('project-10')">
+                                <rect x="145" y="296" width="40" height="25" rx="3"/>
+                                <text x="165" y="309">P10</text>
+                                <text x="165" y="317" class="fence-label">cont.</text>
+                            </g>
+
+                            <!-- Street labels -->
+                            <text x="10" y="8" fill="rgba(255,255,255,0.2)" font-size="5" font-weight="600">WEST SIDE</text>
+                            <text x="155" y="8" fill="rgba(255,255,255,0.2)" font-size="5" font-weight="600">EAST SIDE</text>
+                            <text x="82" y="338" fill="rgba(255,255,255,0.15)" font-size="4.5">ALLEY 3 (N-S)</text>
+                        </svg>
+                    </div>
+                    <div class="fmap-legend">
+                        <div class="fmap-legend-item">
+                            <div class="fmap-legend-swatch" style="background: rgba(15,164,175,0.12); border-color: rgba(15,164,175,0.4);"></div>
+                            Fence Segment
+                        </div>
+                        <div class="fmap-legend-item">
+                            <div class="fmap-legend-swatch" style="background: rgba(15,164,175,0.35); border-color: var(--accent);"></div>
+                            Selected
+                        </div>
+                        <div class="fmap-legend-item">
+                            <div class="fmap-legend-swatch" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1);"></div>
+                            Alley Corridor
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Info Panel -->
+            <div class="fmap-panel-col">
+                <div class="fmap-panel" id="infoPanel">
+                    <div class="fmap-panel-title">Segment Details</div>
+                    <div class="fmap-panel-body" id="panelBody">
+                        <div class="fmap-empty-state" id="emptyState">
+                            <div class="arrow-hint">&#8592;</div>
+                            <p>Select a fence segment to view details.</p>
+                            <p style="font-size: 0.75rem; margin-top: 8px; opacity: 0.6;">Click any highlighted zone on the alley map to load project data.</p>
+                        </div>
+                        <div id="projectContent" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav Toggle -->
+    <script>
+        document.getElementById('navToggle').addEventListener('click', function () {
+            document.getElementById('navTabs').classList.toggle('active');
+        });
+    </script>
+
+    <!-- Fence Map Logic -->
+    <script>
+        var costData = null;
+        var activeProject = null;
+
+        // Load cost data on page init
+        costData = {
+  "source": "AREAS A - C Information.pdf (64 pages, OCR extracted)",
+  "projects": [
+    {
+      "id": "project-2",
+      "area": "A",
+      "project": "Project 2",
+      "title": "Area A - Project 2",
+      "sections": "Sections 1-6",
+      "scope": "Full revitalization of residential alleyway. Sections 1-6 address damaged fencing, graffiti, and deteriorating pavement.",
+      "primary_image": "static/images/areas/project-2/White Wooden Fence (Graffiti Removal + Repaint + Ground Detailing) 1.png",
+      "image_caption": "Existing Condition -- White wooden fence with graffiti, Area A",
+      "rhino_file": "static/docs/rhino/project-2.3dm",
+      "map_label": "S1-S6 Fence Segment",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint", "low": 1080, "high": 2965},
+            {"item": "Brushes", "low": "Incl./$90", "high": "Incl./$90"}
+          ],
+          "labor_hrs": {"low": 120.5, "high": 157.5},
+          "labor_cost": {"low": 2890, "high": 4860},
+          "total": {"low": 5060, "high": 7915},
+          "notes": "Combined total includes white, black, and blue paint types across wood and metal surfaces. Brushes estimated at $15/section if not included in kits."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Paint/Buffer", "low": 640, "high": 1345},
+            {"item": "Brushes", "low": "Included", "high": "Included"}
+          ],
+          "labor_hrs": {"low": 16, "high": 28},
+          "labor_cost": {"low": 490, "high": 955},
+          "total": {"low": 1130, "high": 2300},
+          "notes": "Includes base repairs, light patching, weed trimming, planter additions, and surface smoothing."
+        },
+        "grand_total": {"low": 6190, "high": 10215}
+      },
+      "wall_description": "Improvements across all sections include cleaning, graffiti removal, sanding, and repainting both metal and wood fences. Multiple paint types were used, including neutral black, white, and water-themed tones to brighten the alley and improve visual cohesion. Anti-rust coatings, anti-graffiti sealants, and primer were applied where needed to protect against long-term wear. In some areas, structural upgrades like replacing wood planks or rebuilding damaged fencing were essential to restore safety and stability.",
+      "pavement_description": "Pavement upgrades were mostly light-to-moderate interventions such as weed removal, surface patching, crack filling, and base cleaning. Some sections included brick base demo and rebuild, while others added planters or green buffers to soften harsh transitions and define walking space."
+    },
+    {
+      "id": "project-3",
+      "area": "A",
+      "project": "Project 3",
+      "title": "Area A - Project 3",
+      "sections": "Sections 1-7",
+      "scope": "Continued alley restoration covering fences, gates, stucco, rust removal, repainting, panel repairs, and optional trim.",
+      "primary_image": "static/images/areas/project-3/Gate Segment with Rusted Frame, Painted Panel, and Overgrown Pavemen 1.png",
+      "image_caption": "Existing Condition -- Rusted gate frame with overgrown pavement, Area A",
+      "rhino_file": "static/docs/rhino/project-3.3dm",
+      "map_label": "S1-S7 Gate & Fence",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint", "low": 1075, "high": 1875},
+            {"item": "Brushes", "low": 1115, "high": 1885}
+          ],
+          "labor_hrs": {"low": 35, "high": 50},
+          "labor_cost": {"low": 1235, "high": 1880},
+          "total": {"low": 3355, "high": 5640},
+          "notes": "Covers fences, gates, stucco, rust removal, repainting, panel repairs, optional trim, etc."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Repair/Buffer", "low": 610, "high": 1145},
+            {"item": "Brushes/Tools", "low": "Included", "high": "Included"}
+          ],
+          "labor_hrs": {"low": 14, "high": 20},
+          "labor_cost": {"low": 370, "high": 590},
+          "total": {"low": 980, "high": 1735},
+          "notes": "Includes crack sealing, patching, weed removal, curb cleanup and paint."
+        },
+        "roofline": {
+          "items": [
+            {"item": "Fascia/Shingle Work", "low": 40, "high": 60}
+          ],
+          "labor_hrs": {"low": 1, "high": 2},
+          "labor_cost": {"low": 30, "high": 50},
+          "total": {"low": 70, "high": 110},
+          "notes": "Only from Section 3; includes fascia/shingle patches (minor)."
+        },
+        "landscaping": {
+          "items": [
+            {"item": "Trim/Planter Work", "low": 40, "high": 150}
+          ],
+          "notes": "Section 1 only -- includes vegetation trimming and optional planter refresh."
+        },
+        "grand_total": {"low": 4445, "high": 7745}
+      },
+      "wall_description": "Wall repairs across all sections included cleaning, sanding, patching, and repainting both metal and masonry surfaces. Sections with rusted iron gates and weathered concrete were treated with primer, rust protectants, and durable finishes. A mix of paint types like neutrals, bold accent colors, and water-themed tones were used to improve visual consistency.",
+      "pavement_description": "Pavement improvements ranged from basic weed removal and surface sweeping to more detailed crack filling, patching, and curb repairs."
+    },
+    {
+      "id": "project-4",
+      "area": "B",
+      "project": "Project 4",
+      "title": "Area B - Project 4",
+      "sections": "Sections 1-3",
+      "scope": "Large and mid-sized wall repairs with varying levels of graffiti, cracking, chipping, and weather wear.",
+      "primary_image": "static/images/areas/project-4/Concrete Wall with Graffiti, Chipping, and Surface Burn 1.png",
+      "image_caption": "Existing Condition -- Concrete wall with graffiti and surface burn, Area B",
+      "rhino_file": "static/docs/rhino/project-4.3dm",
+      "map_label": "S1-S3 Wall Segment",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint", "low": 495, "high": 825},
+            {"item": "Materials", "low": 375, "high": 590}
+          ],
+          "labor_hrs": {"low": 17, "high": 20},
+          "labor_cost": {"low": 625, "high": 890},
+          "total": {"low": 1495, "high": 2305},
+          "notes": "Includes two-coat repainting, rust-resistant and anti-graffiti primer, stucco patching, wall prep, and minor sealing."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Repair/Buffer", "low": 235, "high": 395},
+            {"item": "Brushes/Tools", "low": "Included", "high": "Included"}
+          ],
+          "labor_hrs": {"low": 3.5, "high": 5.5},
+          "labor_cost": {"low": 110, "high": 160},
+          "total": {"low": 345, "high": 555},
+          "notes": "Includes crack patching, curb fill, sweeping, and light sealing."
+        },
+        "grand_total": {"low": 1840, "high": 2860}
+      },
+      "wall_description": "Sections 1 through 3 involved a mix of large and mid-sized wall repairs with varying levels of graffiti, cracking, chipping, and weather wear. Interventions included full stucco resurfacing, sealant application, cement-based patching, and multi-coat repainting.",
+      "pavement_description": "Pavement work across all three sections centered on crack filling, light patching, and debris removal."
+    },
+    {
+      "id": "project-5",
+      "area": "B",
+      "project": "Project 5",
+      "title": "Area B - Project 5",
+      "sections": "Sections 1-3",
+      "scope": "Full-surface rust removal, sanding, and repainting of metal gates and fences across three key sections.",
+      "primary_image": "static/images/areas/project-5/Iron Fence + Concrete Base1.png",
+      "image_caption": "Existing Condition -- Iron fence with concrete base, Area B",
+      "rhino_file": "static/docs/rhino/project-5.3dm",
+      "map_label": "S1-S3 Iron Fence",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint", "low": 240, "high": 390},
+            {"item": "Materials", "low": 460, "high": 640}
+          ],
+          "labor_hrs": {"low": 13, "high": 14.5},
+          "labor_cost": {"low": 650, "high": 730},
+          "total": {"low": 1350, "high": 1760},
+          "notes": "Includes full rust treatment, 2-coat painting, topcoat or color detail, and primer across all wall sections."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Repair/Patch", "low": 140, "high": 200},
+            {"item": "Cleaning/Seal", "low": 75, "high": 110}
+          ],
+          "labor_hrs": {"low": 5, "high": 6},
+          "labor_cost": {"low": 200, "high": 310},
+          "total": {"low": 475, "high": 620},
+          "notes": "Includes concrete crack fill, edge patching, sealant, and light cleaning for pavement in all 3 sections."
+        },
+        "grand_total": {"low": 1825, "high": 2380}
+      },
+      "wall_description": "The wall improvements across Sections 1-3 involved full-surface rust removal, sanding, and repainting of metal gates and fences. Each section received two coats of rust-inhibiting enamel paint, with optional color detailing or topcoats to improve visual consistency and protect against future wear.",
+      "pavement_description": "Pavement work addressed cosmetic and functional issues throughout the same three sections. Crews filled visible cracks, patched edge lines, and performed power washing and sealant application where needed."
+    },
+    {
+      "id": "project-6",
+      "area": "C",
+      "project": "Project 6",
+      "title": "Area C - Project 6",
+      "sections": "Sections 1-3",
+      "scope": "Restoring continuous stretch of black iron fencing with varying gate styles.",
+      "primary_image": "static/images/areas/project-6/Curved Black Iron Fence with Concrete Base (Right of Gate) 1.png",
+      "image_caption": "Existing Condition -- Black iron fence with concrete base, Area C",
+      "rhino_file": "static/docs/rhino/project-6.3dm",
+      "map_label": "S1-S3 Iron Fence",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint", "low": 495, "high": 825},
+            {"item": "Materials", "low": 385, "high": 565}
+          ],
+          "labor_hrs": {"low": 11.5, "high": 13.5},
+          "labor_cost": {"low": 600, "high": 685},
+          "total": {"low": 1480, "high": 2075},
+          "notes": "Includes scraping, sanding, 2-coat painting, color detail, clear topcoat, rust protection, and sealing across all wall sections."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Repair/Buffer", "low": 235, "high": 370},
+            {"item": "Brushes/Tools", "low": "Included", "high": "Included"}
+          ],
+          "labor_hrs": {"low": 3.5, "high": 4},
+          "labor_cost": {"low": 160, "high": 185},
+          "total": {"low": 395, "high": 555},
+          "notes": "Includes patching, power washing, edge sealing, and debris clearing at all pavement locations."
+        },
+        "grand_total": {"low": 1875, "high": 2630}
+      },
+      "wall_description": "Across Sections 1 to 3, the wall interventions focused on restoring a continuous stretch of black iron fencing with varying gate styles. Each section required rust removal, sanding, and full repainting using a durable, rust-resistant finish.",
+      "pavement_description": "The pavement improvements were tailored to each section's surface condition. Repairs included crack filling, patching, edge sealing, and concrete touch-ups."
+    },
+    {
+      "id": "project-7",
+      "area": "C",
+      "project": "Project 7",
+      "title": "Area C - Project 7",
+      "sections": "Sections 1-6",
+      "scope": "Concrete walls, mural walls, and metal gates. Surface cleaning, paint restoration, rust removal, and anti-graffiti/UV protection.",
+      "primary_image": "static/images/areas/project-7/Concrete Wall with Painted Mural 1.png",
+      "image_caption": "Existing Condition -- Concrete wall with painted mural, Area C",
+      "rhino_file": "static/docs/rhino/project-7.3dm",
+      "map_label": "S1-S6 Mural & Gate",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint", "low": 780, "high": 1285},
+            {"item": "Materials", "low": 555, "high": 870}
+          ],
+          "labor_hrs": {"low": 16.5, "high": 21.5},
+          "labor_cost": {"low": 900, "high": 1160},
+          "total": {"low": 2235, "high": 3315},
+          "notes": "Wall work includes all paint prep, color detailing, UV/mural sealants, rust removal, and full-surface restoration across 4 concrete walls and 2 gates."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Repair/Buffer", "low": 355, "high": 565},
+            {"item": "Tools/Brushes", "low": "Included", "high": "Included"}
+          ],
+          "labor_hrs": {"low": 6, "high": 9},
+          "labor_cost": {"low": 300, "high": 430},
+          "total": {"low": 655, "high": 995},
+          "notes": "Includes patching, line work, curb repaint, drain cleanouts, and basic sweep/weed removal for all paved areas in Sections 1-6."
+        },
+        "combined": {
+          "materials_total": {"low": 1310, "high": 2155},
+          "labor_hrs": {"low": 22.5, "high": 31},
+          "labor_cost": {"low": 1200, "high": 1590}
+        },
+        "grand_total": {"low": 2510, "high": 3745}
+      },
+      "wall_description": "Sections 1 through 6 include a mix of concrete walls, mural walls, and metal gates. Work across these areas focused on surface cleaning, paint restoration, rust removal, and anti-graffiti/UV protection. Painted murals such as the 'Respect' mural and other community art pieces were carefully retouched or sealed for long-term preservation.",
+      "pavement_description": "Pavement repairs across all sections included surface crack patching, drain cleanouts, repainting curb or edge lines, and general sweeping."
+    },
+    {
+      "id": "project-8",
+      "area": "C",
+      "project": "Project 8",
+      "title": "Area C - Project 8",
+      "sections": "Sections 1-3",
+      "scope": "Restoring gate and garage wall surfaces with sanding, rust removal, and fresh coats of rust-resistant paint. Roof restoration for garage units.",
+      "primary_image": "static/images/areas/project-8/Garage Doors + Wall Sections (Excludes Roof) 1.png",
+      "image_caption": "Existing Condition -- Garage doors and wall sections, Area C",
+      "rhino_file": "static/docs/rhino/project-8.3dm",
+      "map_label": "S1-S3 Garage & Gate",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint", "low": 195, "high": 285},
+            {"item": "Materials (Primer, Enamel, Tools)", "low": 130, "high": 260}
+          ],
+          "labor_hrs": {"low": 5, "high": 6},
+          "labor_cost": {"low": 225, "high": 285},
+          "total": {"low": 550, "high": 840},
+          "notes": "Includes rust removal, 2-coat painting, optional gloss/sealant, and wall prep for garage doors and gates."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Cleaning, Debris, Edge Detail, Patching", "low": 65, "high": 120},
+            {"item": "Tools/Brushes", "low": "Included", "high": "Included"}
+          ],
+          "labor_hrs": {"low": 1.5, "high": 2},
+          "labor_cost": {"low": 95, "high": 75},
+          "total": {"low": 120, "high": 195},
+          "notes": "Includes trash removal, edge sweeping, optional crack filler near gate/garage bases."
+        },
+        "roof": {
+          "items": [
+            {"item": "Sealant (2 Coats), Primer (Optional)", "low": 130, "high": 250},
+            {"item": "Materials (Sealant, Squeegee, Tools)", "low": 90, "high": 150}
+          ],
+          "labor_hrs": {"low": 3.5, "high": 4.5},
+          "labor_cost": {"low": 130, "high": 170},
+          "total": {"low": 350, "high": 570},
+          "notes": "Covers roof scraping, optional waterproof topcoat, and full sealant application."
+        },
+        "combined": {
+          "materials_total": {"low": 350, "high": 570},
+          "labor_hrs": {"low": 10, "high": 13},
+          "labor_cost": {"low": 410, "high": 540}
+        },
+        "grand_total": {"low": 1315, "high": 2145}
+      },
+      "wall_description": "Sections 1 through 3 involved restoring various gate and garage wall surfaces with sanding, rust removal, and fresh coats of rust-resistant paint. Optional gloss or sealant finishes were offered for added durability and visual enhancement.",
+      "pavement_description": "Pavement work across the three sections focused on clearing trash, removing overgrown weeds, edge detailing, and optional crack patching near base areas.",
+      "roof_description": "Roof restoration was focused on the garage units in Section 2, where moss buildup and worn coatings were addressed. The repair plan included surface scraping, two layers of roof sealant, and optional waterproofing topcoats and primers."
+    },
+    {
+      "id": "project-9",
+      "area": "D",
+      "project": "Project 9",
+      "title": "Area D - Project 9",
+      "sections": "Sections 1-7",
+      "scope": "Full perimeter gate and fence restoration. Red and black metal fence segments, multiple gates and walk-through doors.",
+      "primary_image": "static/images/areas/project-9/Red Fence Gate 1.png",
+      "image_caption": "Existing Condition -- Red fence gate with barbed wire, Area D",
+      "rhino_file": "static/docs/rhino/project-9.3dm",
+      "map_label": "S1-S7 Red & Black Fence",
+      "cost_table": {
+        "gate_wall": {
+          "items": [
+            {"item": "Paint/Primer/Top Coat/Finish", "low": 215, "high": 320},
+            {"item": "Rod Replacement/Welding/Bar Work", "low": 240, "high": 400},
+            {"item": "Optional: Barbed Wire/Mesh/Signage", "low": 50, "high": 100},
+            {"item": "Materials", "low": 505, "high": 820}
+          ],
+          "labor_hrs": {"low": 25, "high": 30},
+          "labor_cost": {"low": 875, "high": 1100},
+          "total": {"low": 1380, "high": 1920},
+          "notes": "Total includes all bar alignment, rod replacement, weld repair, and optional components like mesh, signage, or barbed wire. High-end reflects complete repainting and full weed servicing."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Cleanup, Weed Removal, Patch Repairs", "low": 125, "high": 200},
+            {"item": "Materials", "low": "Included", "high": "Included"}
+          ],
+          "labor_hrs": {"low": 9, "high": 10.5},
+          "labor_cost": {"low": 315, "high": 375},
+          "total": {"low": 440, "high": 575},
+          "notes": "Includes clearing, minor patching, and sidewalk detailing at all gate bases. Labor varies based on scope and frequency of ground servicing."
+        },
+        "combined": {
+          "materials_total": {"low": 505, "high": 820},
+          "labor_hrs": {"low": 34, "high": 41},
+          "labor_cost": {"low": 1190, "high": 1475}
+        },
+        "grand_total": {"low": 1695, "high": 2295}
+      },
+      "wall_description": "Across Sections 1 through 7, extensive repairs were completed on both red and black metal fence segments, including multiple gates and walk-through doors. Work involved full rust removal, repainting with anti-rust coatings, and bar replacement where structural damage had occurred.",
+      "pavement_description": "Pavement work throughout the area focused on cleaning, weed removal, edge detailing, and minor patching near the base of each gate and fence panel."
+    },
+    {
+      "id": "project-10",
+      "area": "D",
+      "project": "Project 10",
+      "title": "Area D - Project 10",
+      "sections": "Sections 1-8",
+      "scope": "Full-length intervention addressing long-term neglect. Metal fence panels, rolling gates, walk-through gates, and large mural walls.",
+      "primary_image": "static/images/areas/project-10/Large Mural Wall with Pipe Detail 1.png",
+      "image_caption": "Existing Condition -- Large mural wall with pipe detail, Area D",
+      "rhino_file": "static/docs/rhino/project-10.3dm",
+      "map_label": "S1-S8 Mural & Rolling Gate",
+      "cost_table": {
+        "wall": {
+          "items": [
+            {"item": "Paint & Materials", "low": 590, "high": 845}
+          ],
+          "labor_hrs": {"low": 21, "high": 26.5},
+          "labor_cost": {"low": 850, "high": 1130},
+          "total": {"low": 1440, "high": 1975},
+          "notes": "Includes repainting, rust prep, bar repairs, latch fixes, and anti-graffiti protection across walls and gates."
+        },
+        "pavement": {
+          "items": [
+            {"item": "Ground Materials", "low": 90, "high": 135}
+          ],
+          "labor_hrs": {"low": 6.5, "high": 8},
+          "labor_cost": {"low": 270, "high": 370},
+          "total": {"low": 360, "high": 505},
+          "notes": "Ground prep includes scraping, weeding, debris removal, patching, and clearing for all bases."
+        },
+        "combined": {
+          "materials_total": {"low": 680, "high": 980},
+          "labor_hrs": {"low": 27.5, "high": 35},
+          "labor_cost": {"low": 1120, "high": 1500}
+        },
+        "grand_total": {"low": 1800, "high": 2480}
+      },
+      "wall_description": "This area includes a mix of metal fence panels, rolling gates, walk-through gates, and large mural walls. Across all sections, walls received repairs for bar alignment, fastener replacements, latch fixes, and minor welding. Mural walls were cleaned, repainted, and preserved to restore their visual impact.",
+      "pavement_description": "Pavement restoration focused on clearing grime, weeds, and debris along the base of all gates and walls. Surface patching and protective coatings were applied where needed to improve safety and durability."
+    }
+  ],
+  "summary": {
+    "area_a_total": {"low": 10635, "high": 17960, "projects": ["Project 2", "Project 3"]},
+    "area_b_total": {"low": 3665, "high": 5240, "projects": ["Project 4", "Project 5"]},
+    "area_c_total": {"low": 5700, "high": 8520, "projects": ["Project 6", "Project 7", "Project 8"]},
+    "area_d_total": {"low": 3495, "high": 4775, "projects": ["Project 9", "Project 10"]},
+    "overall_grand_total": {"low": 23495, "high": 36495}
+  }
+};
+                console.error('Failed to load cost data:', err);
+            });
+
+        function selectProject(projectId) {
+            if (!costData) return;
+
+            // Find project in data
+            var project = null;
+            for (var i = 0; i < costData.projects.length; i++) {
+                if (costData.projects[i].id === projectId) {
+                    project = costData.projects[i];
+                    break;
+                }
+            }
+            if (!project) return;
+
+            activeProject = projectId;
+
+            // Update SVG active states
+            var segments = document.querySelectorAll('.fence-segment');
+            for (var s = 0; s < segments.length; s++) {
+                if (segments[s].getAttribute('data-project') === projectId) {
+                    segments[s].classList.add('active');
+                } else {
+                    segments[s].classList.remove('active');
+                }
+            }
+
+            // Build grand total
+            var grandLow = 0;
+            var grandHigh = 0;
+            var gt = project.cost_table.grand_total;
+            if (gt) {
+                grandLow = gt.low;
+                grandHigh = gt.high;
+            }
+
+            // Build category notes
+            var notes = '';
+            if (project.wall_description) {
+                notes += '<strong>Wall:</strong> ' + project.wall_description + '<br>';
+            }
+            if (project.pavement_description) {
+                notes += '<strong>Pavement:</strong> ' + project.pavement_description + '<br>';
+            }
+            if (project.roof_description) {
+                notes += '<strong>Roof:</strong> ' + project.roof_description;
+            }
+
+            // Rhino file link
+            var rhinoHref = project.rhino_file || '#';
+            var rhinoLabel = 'Download Rhino Design File';
+
+            // Build panel HTML
+            var html = '';
+            html += '<div class="fmap-project-header">';
+            html += '  <div class="fmap-project-title">' + escapeHtml(project.title) + '</div>';
+            html += '  <span class="fmap-area-badge">Area ' + escapeHtml(project.area) + '</span>';
+            html += '  <span class="fmap-sections-badge">' + escapeHtml(project.sections) + '</span>';
+            if (project.map_label) {
+                html += '  <span class="fmap-sections-badge" style="margin-left: 8px; opacity: 0.6;">' + escapeHtml(project.map_label) + '</span>';
+            }
+            html += '</div>';
+
+            // Image
+            if (project.primary_image) {
+                html += '<div class="fmap-image-wrap">';
+                html += '  <img src="' + encodeURI(project.primary_image) + '" alt="' + escapeHtml(project.image_caption || project.title) + '" loading="lazy">';
+                if (project.image_caption) {
+                    html += '  <div class="fmap-image-caption">' + escapeHtml(project.image_caption) + '</div>';
+                }
+                html += '</div>';
+            }
+
+            // Scope
+            html += '<div class="fmap-scope">' + escapeHtml(project.scope) + '</div>';
+
+            // Cost summary
+            html += '<div class="fmap-cost-summary">';
+            html += '  <div class="fmap-cost-card">';
+            html += '    <div class="fmap-cost-label">Low Estimate</div>';
+            html += '    <div class="fmap-cost-value">$' + numberWithCommas(grandLow) + '</div>';
+            html += '  </div>';
+            html += '  <div class="fmap-cost-card">';
+            html += '    <div class="fmap-cost-label">High Estimate</div>';
+            html += '    <div class="fmap-cost-value">$' + numberWithCommas(grandHigh) + '</div>';
+            html += '  </div>';
+            html += '</div>';
+
+            // Grand total
+            html += '<div class="fmap-grand-total">';
+            html += '  <div class="fmap-cost-label">Grand Total Range</div>';
+            html += '  <div class="fmap-cost-value grand">$' + numberWithCommas(grandLow) + ' - $' + numberWithCommas(grandHigh) + '</div>';
+            html += '</div>';
+
+            // Action buttons
+            html += '<div class="fmap-actions">';
+            html += '  <a href="' + rhinoHref + '" class="fmap-btn fmap-btn-secondary" target="_blank">' + rhinoLabel + '</a>';
+            html += '  <a href="/customize/' + encodeURIComponent(project.id) + '" class="fmap-btn fmap-btn-primary">Launch Customization</a>';
+            html += '</div>';
+
+            // Notes
+            if (notes) {
+                html += '<div class="fmap-notes">' + notes + '</div>';
+            }
+
+            // Render
+            document.getElementById('emptyState').style.display = 'none';
+            var contentEl = document.getElementById('projectContent');
+            contentEl.innerHTML = html;
+            contentEl.style.display = 'block';
+            document.getElementById('infoPanel').classList.add('has-data');
+
+            // Scroll panel into view on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('infoPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function numberWithCommas(x) {
+            if (x === 0 || !x) return '0';
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+    </script>
+</body>
+</html>
